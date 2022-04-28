@@ -14,14 +14,18 @@ typedef enum {
 
 typedef struct item {
 	string** info; // массив строк 
-	int** keys, size_arrs; // массив ключей, идекс последниего элемента в массивах
+	int** keys; //массив ключей
+	int size_arrs; // идекс последниего элемента в массивах
 }item;
 
 
 typedef struct tree {
-	item* item; // если элемент дерева не лист == NULL
+	item* item; // если элемент дерева не лист == NULL, иначе там хранятся ключи + информация
 	struct tree* left, * right, * parent;
-	int border, max_count_of_elements_on_lvl, k, arg;
+	int border; // граница на текущем уровне, по которой определяем куда кинуть элемент
+	int max_count_of_elements_on_lvl; // максимальное количество элементов в листе
+	int k; // размерность дерева
+	int arg; // элемент по которому сравнивается куда распределить элемент
 }tree;
 
 void create_tree(tree** t, int max_count_of_elements_on_lvl, int k);
