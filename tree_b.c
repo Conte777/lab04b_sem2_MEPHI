@@ -108,12 +108,12 @@ int add_e(tree* t, int* key, string* info) {
 			item* item1 = (item*)calloc(1, sizeof(item));
 			item* item2 = (item*)calloc(1, sizeof(item));
 			if ((t->item->size_arrs + 1) % 2 == 0) {
-				item1->size_arrs = t->item->size_arrs / 2;
-				item2->size_arrs = t->item->size_arrs / 2;
+				item1->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
+				item2->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
 			}
 			else {
-				item1->size_arrs = t->item->size_arrs / 2 - 1;
-				item2->size_arrs = t->item->size_arrs / 2;
+				item1->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
+				item2->size_arrs = (t->item->size_arrs + 1) / 2;
 			}
 			item1->info = (string**)calloc(item1->size_arrs + 1, sizeof(string*));
 			item1->keys = (int**)calloc(item1->size_arrs + 1, sizeof(int*));
@@ -123,7 +123,7 @@ int add_e(tree* t, int* key, string* info) {
 				item1->keys[i] = t->item->keys[i];
 				item1->info[i] = t->item->info[i];
 			}
-			for (int i = 1; i <= item2->size_arrs; i++) {
+			for (int i = 0; i <= item2->size_arrs; i++) {
 				item2->keys[i] = t->item->keys[item1->size_arrs + i];
 				item2->info[i] = t->item->info[item1->size_arrs + i];
 			}
@@ -149,7 +149,10 @@ int add_e(tree* t, int* key, string* info) {
 			left->k = t->k;
 			right->k = t->k;
 			// обращаюсь за границы массива, не вижу где
-			t->border = (left->item->keys[left->item->size_arrs][t->arg] + right->item->keys[0][t->arg]) / 2;
+			t->border = 0;
+			t->border += left->item->keys[left->item->size_arrs][t->arg];
+			t->border += right->item->keys[0][t->arg];
+			t->border /= 2;
 			sort_item(item1, left->arg);
 			sort_item(item2, right->arg);
 			t->left = left;
@@ -233,11 +236,12 @@ void free_tree(tree* t) {
 		free_tree(t->right);
 		for (int i = 0; i < t->item->size_arrs; i++) {
 			if (t->item->info[i] != NULL)
-				free(t->item->info[i]);
+				free_s(t->item->info[i]);
 			if (t->item->keys[i] != NULL)
 				free(t->item->keys[i]);
 		}
 		free(t->item->keys);
 		free(t->item->info);
+		free(t->item);
 	}
 }
