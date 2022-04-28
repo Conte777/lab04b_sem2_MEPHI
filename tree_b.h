@@ -21,12 +21,18 @@ typedef struct item {
 typedef struct tree {
 	item* item; // если элемент дерева не лист == NULL
 	struct tree* left, * right, * parent;
-	int* border, max_count_of_elements_on_lvl, k;
+	int border, max_count_of_elements_on_lvl, k, arg;
 }tree;
 
 void create_tree(tree** t, int max_count_of_elements_on_lvl, int k);
 
-int add_e(tree* t, int* key, string* info, int arg);
+int add_e(tree* t, int* key, string* info);
+
+int scan(tree* t, int* key, string** data);
+
+int sort_item(item* item, int arg);
+
+int print_tree(tree* t);
 
 int compar_keys(int* key1, int* key2, int size);
 

@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-
 typedef enum {
 	OK1 = 0,
 	OF1 = 1,

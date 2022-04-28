@@ -1,1 +1,11 @@
 /.vscode
+build/Release/tree_b.o
+build/Release/string1.o
+build/Release/outRelease
+.gitignore
+build/Debug/tree_b.o
+build/Debug/string1.o
+build/Debug/outDebug
+.gitignore
+build/Release/main.o
+build/Debug/main.o
