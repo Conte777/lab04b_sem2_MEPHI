@@ -113,6 +113,7 @@ int add_e(tree* t, int* key, string* info) {
 			if (t->border <= key[t->arg])
 				return add_e(t->right, key, info);
 	}
+	return UN;
 }
 
 int sort_item(item* item, int arg) {
@@ -131,9 +132,12 @@ int sort_item(item* item, int arg) {
 }
 
 int compar_keys(int* key1, int* key2, int size) {
+	int flag = 1;
 	for (int i = 0; i < size; i++)
-		if (key1[i] == key2[i])
-			return 1;
+		if (key1[i] != key2[i])
+			flag = 0;
+	if (flag)
+		return 1;
 	return 0;
 }
 
@@ -148,11 +152,54 @@ int scan(tree* t, int* key, string** data) {
 			}
 	}
 	if (t->left != NULL)
-		if (t->border > key[t->arg])
+		if (t->border >= key[t->arg])
 			return scan(t->left, key, data);
 	if (t->right != NULL)
-		if (t->border <= key[t->arg])
+		if (t->border < key[t->arg])
 			return scan(t->right, key, data);
+	return UN;
+}
+
+int scan_max(tree* t, int** key_data, string** info_data) {
+	if (t == NULL)
+		return UN;
+	tree* ptr = t;
+	while (ptr->right != NULL)
+		ptr = ptr->right;
+	*key_data = ptr->item->keys[ptr->item->size_arrs];
+	*info_data = ptr->item->info[ptr->item->size_arrs];
+	return OK;
+}
+
+int del_e(tree* t, int* key) {
+	if (t == NULL || key == NULL)
+		return UN;
+	if (t->left != NULL)
+		if (t->border >= key[t->arg])
+			return del_e(t->left, key);
+	if (t->right != NULL)
+		if (t->border < key[t->arg])
+			return del_e(t->right, key);
+	if (t->left == NULL && t->right == NULL) {
+		if (t->item->size_arrs < 0)
+			return UN;
+		for (int i = 0; i <= t->item->size_arrs; i++) {
+			if (compar_keys(key, t->item->keys[i], t->k)) {
+				free(t->item->keys[i]);
+				free_s(&t->item->info[i]);
+				if (i != t->item->size_arrs) {
+					for (int j = i; j <= t->item->size_arrs; j++) {
+						t->item->keys[j] = t->item->keys[j + 1];
+						t->item->info[j] = t->item->info[j + 1];
+					}
+					t->item->keys[t->item->size_arrs + 1] = NULL;
+					t->item->info[t->item->size_arrs + 1] = NULL;
+				}
+				t->item->size_arrs--;
+				return OK;
+			}
+		}
+	}
 	return UN;
 }
 

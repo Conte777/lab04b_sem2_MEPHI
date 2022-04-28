@@ -10,3 +10,4 @@ build/Debug/outDebug
 build/Release/main.o
 build/Debug/main.o
 build/Debug/outDebug.exe
+build/Release/outRelease.exe

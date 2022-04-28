@@ -3,6 +3,7 @@
 int main() {
 	tree* t = NULL;
 	string* s, * data = NULL;
+	int* key5;
 	create_tree(&t, 3, 2);
 	get_s(&s);
 	int* key1 = (int*)calloc(2, sizeof(int));
@@ -24,6 +25,14 @@ int main() {
 	add_e(t, key3, s);
 	get_s(&s);
 	add_e(t, key4, s);
+	scan(t, key4, &data);
+	print_string(data);
+	printf("\n");
+	scan_max(t, &key5, &data);
+	print_tree(t);
+	printf("\n");
+	del_e(t, key5);
 	print_tree(t);
 	free_tree(t);
+	return OK;
 }

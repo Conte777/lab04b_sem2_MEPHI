@@ -34,6 +34,10 @@ int add_e(tree* t, int* key, string* info);
 
 int scan(tree* t, int* key, string** data);
 
+int scan_max(tree* t, int** key_data, string** info_data);
+
+int del_e(tree* t, int* key);
+
 int sort_item(item* item, int arg);
 
 int print_tree(tree* t);
