@@ -4,7 +4,6 @@ void create_tree(tree** t, int max_count_of_elements_on_lvl, int k) {
 	*t = (tree*)calloc(1, sizeof(tree));
 	(*t)->max_count_of_elements_on_lvl = max_count_of_elements_on_lvl;
 	(*t)->k = k;
-	(*t)->parent = NULL;
 	(*t)->right = NULL;
 	(*t)->left = NULL;
 	(*t)->item = (item*)calloc(1, sizeof(item));
@@ -88,8 +87,6 @@ int add_e(tree* t, int* key, string* info) {
 			right->max_count_of_elements_on_lvl = t->max_count_of_elements_on_lvl;
 			left->item = item1;
 			right->item = item2;
-			left->parent = t;
-			right->parent = t;
 			left->k = t->k;
 			right->k = t->k;
 			// обращаюсь за границы массива, не вижу где
@@ -151,12 +148,20 @@ int scan(tree* t, int* key, string** data) {
 				return OK;
 			}
 	}
-	if (t->left != NULL)
-		if (t->border >= key[t->arg])
+	if (t->left != NULL && t->right != NULL) {
+		if (t->border > key[t->arg])
 			return scan(t->left, key, data);
-	if (t->right != NULL)
 		if (t->border < key[t->arg])
 			return scan(t->right, key, data);
+		if (t->border == key[t->arg]) {
+			int error1, error2;
+			error1 = scan(t->left, key, data);
+			error2 = scan(t->right, key, data);
+			if (!error1 || !error2)
+				return OK;
+			return UN;
+		}
+	}
 	return UN;
 }
 
@@ -171,15 +176,85 @@ int scan_max(tree* t, int** key_data, string** info_data) {
 	return OK;
 }
 
+int scan_neighbor(tree* t, int* key, int* distance, int** key_data, string** info_data) {
+	if (t == NULL || key == NULL)
+		return UN;
+	if (t->left != NULL && t->right != NULL) {
+		if (key[t->arg] != t->border) {
+			if (key[t->arg] < t->border)
+				scan_neighbor(t->left, key, distance, key_data, info_data);
+			if (key[t->arg] > t->border)
+				scan_neighbor(t->right, key, distance, key_data, info_data);
+			int distance_to_box = t->border - key[t->arg];
+			distance_to_box *= distance_to_box;
+			int buffer_distance, * buffer_key = NULL;
+			string* buffer_info = NULL;
+			if (distance_to_box <= *distance) {
+				if (key[t->arg] < t->border)
+					scan_neighbor(t->right, key, &buffer_distance, &buffer_key, &buffer_info);
+				if (key[t->arg] >= t->border)
+					scan_neighbor(t->left, key, &buffer_distance, &buffer_key, &buffer_info);
+				if (buffer_distance < *distance) {
+					*distance = buffer_distance;
+					*key_data = buffer_key;
+					*info_data = buffer_info;
+				}
+			}
+		}
+		else {
+			int* buffer_key1, * buffer_key2, buffer_distance1, buffer_distance2;
+			string* buffer_info1, * buffer_info2;
+			scan_neighbor(t->left, key, &buffer_distance1, &buffer_key1, &buffer_info1);
+			scan_neighbor(t->right, key, &buffer_distance2, &buffer_key2, &buffer_info2);
+			if (buffer_distance1 < buffer_distance2) {
+				*key_data = buffer_key1;
+				*info_data = buffer_info1;
+				*distance = buffer_distance1;
+			}
+			else {
+				*key_data = buffer_key2;
+				*info_data = buffer_info2;
+				*distance = buffer_distance2;
+			}
+		}
+		return OK;
+	}
+	if (t->left == NULL && t->right == NULL) {
+		int min_distance = 0, buffer_distance = 0, index = 0;
+		for (int i = 0; i < t->k; i++)
+			min_distance += (key[i] - t->item->keys[0][i]) * (key[i] - t->item->keys[0][i]);
+		for (int i = 1; i <= t->item->size_arrs; i++) {
+			for (int j = 0; j < t->k; j++)
+				buffer_distance += (key[j] - t->item->keys[i][j]) * (key[i] - t->item->keys[i][j]);
+			if (buffer_distance < min_distance) {
+				min_distance = buffer_distance;
+				index = i;
+			}
+		}
+		*distance = min_distance;
+		*key_data = t->item->keys[index];
+		*info_data = t->item->info[index];
+		return OK;
+	}
+	return UN;
+}
+
 int del_e(tree* t, int* key) {
 	if (t == NULL || key == NULL)
 		return UN;
-	if (t->left != NULL)
-		if (t->border >= key[t->arg])
+	if (t->left != NULL && t->right != NULL) {
+		if (t->border > key[t->arg])
 			return del_e(t->left, key);
-	if (t->right != NULL)
 		if (t->border < key[t->arg])
 			return del_e(t->right, key);
+		if (t->border == key[t->arg]) {
+			if (!del_e(t->left, key))
+				return OK;
+			if (!del_e(t->right, key))
+				return OK;
+			return UN;
+		}
+	}
 	if (t->left == NULL && t->right == NULL) {
 		if (t->item->size_arrs < 0)
 			return UN;
@@ -215,9 +290,33 @@ int print_tree(tree* t) {
 			print_string(t->item->info[i]);
 			printf("\n");
 		}
+		printf("\n");
 	}
 	if (t->right != NULL)
 		print_tree(t->right);
+	return OK;
+}
+
+int add_e_from_file(tree* t, FILE* file) {
+	if (t == NULL || file == NULL)
+		return UN;
+	int* key = (int*)calloc(t->k, sizeof(int));
+	string* info;
+	for (int i = 0; i < t->k; i++)
+		if (fscanf(file, "%d ", &key[i]) <= 0)
+			return UN;
+	int error = get_f(&info, file);
+	switch (error) {
+	case OK:
+		add_e(t, key, info);
+		add_e_from_file(t, file);
+		break;
+	case UN:
+		break;
+	case OF:
+		add_e(t, key, info);
+		break;
+	}
 	return OK;
 }
 

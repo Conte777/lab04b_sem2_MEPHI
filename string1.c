@@ -85,6 +85,8 @@ int get_f(string** s, FILE* file) {
 		(*s)->string[(*s)->size] = buffer;
 		a = fread(&buffer, sizeof(char), 1, file);
 	}
+	if (a <= 0 && (*s)->size >= 0)
+		return OF1;
 	if ((*s)->size == -1) {
 		free_s(s);
 		return UN1;
