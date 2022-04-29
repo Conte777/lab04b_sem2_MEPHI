@@ -76,8 +76,8 @@ int choice(tree* t, int a) {
 			printf("The item was successfully deleted\n");
 		else
 			printf("An element with such a key was not found\n");
-		return OK;
 		free(key);
+		return OK;
 	case 4:
 		printf("Maximum element in the tree:\nkey: ");
 		scan_max(t, &key_data, &info_data);
