@@ -61,7 +61,7 @@ int choice(tree* t, int a) {
 		if (!scan(t, key, &info_data)) {
 			printf("Here's what was found on your key:\nkey: ");
 			print_key(key, t->k);
-			printf("\n");
+			printf("\ninfo: ");
 			print_string(info_data);
 			printf("\n");
 		}
