@@ -89,11 +89,9 @@ int add_e(tree* t, int* key, string* info) {
 			right->item = item2;
 			left->k = t->k;
 			right->k = t->k;
-			// обращаюсь за границы массива, не вижу где
-			t->border = 0;
-			t->border += left->item->keys[left->item->size_arrs][t->arg];
-			t->border += right->item->keys[0][t->arg];
-			t->border /= 2;
+			t->border = (float)left->item->keys[left->item->size_arrs][t->arg];
+			t->border += (float)right->item->keys[0][t->arg];
+			t->border /= 2.0;
 			sort_item(item1, left->arg);
 			sort_item(item2, right->arg);
 			t->left = left;
@@ -263,12 +261,12 @@ int del_e(tree* t, int* key) {
 				free(t->item->keys[i]);
 				free_s(&t->item->info[i]);
 				if (i != t->item->size_arrs) {
-					for (int j = i; j <= t->item->size_arrs; j++) {
+					for (int j = i; j < t->item->size_arrs; j++) {
 						t->item->keys[j] = t->item->keys[j + 1];
 						t->item->info[j] = t->item->info[j + 1];
 					}
-					t->item->keys[t->item->size_arrs + 1] = NULL;
-					t->item->info[t->item->size_arrs + 1] = NULL;
+					t->item->keys[t->item->size_arrs] = NULL;
+					t->item->info[t->item->size_arrs] = NULL;
 				}
 				t->item->size_arrs--;
 				return OK;
