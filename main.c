@@ -123,6 +123,9 @@ int choice(tree* t, int a) {
 	case 8:
 		test_scan_del_scan_neighbor(2, 10, 20000, 10000, 50, 10, 10000);
 		return OK;
+	case 9:
+		test_add(2, 10, 20000, 10000, 50, 10, 10000);
+		return OK;
 	}
 	return CZ;
 }

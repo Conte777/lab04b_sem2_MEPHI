@@ -360,7 +360,7 @@ int test_scan_del_scan_neighbor(int k, int n, int start_pos, int step, int count
 	float* time_scan_neighbor = (float*)calloc(count_of_steps + 1, sizeof(float));
 	for (int i = 0; i < count_of_tests; i++) {
 		create_tree(&t, n, k);
-		printf("Test #%d\n", i+1);
+		printf("Test #%d\n", i + 1);
 		int** key_array_for_test, start, end;
 		create_random_arr_of_keys(&key_array_for_test, k, size_of_arr_for_test);
 		for (int j = 0; j < count_of_steps; j++) {
@@ -394,10 +394,48 @@ int test_scan_del_scan_neighbor(int k, int n, int start_pos, int step, int count
 		free_tree(t);
 	}
 	for (int i = 0; i < count_of_steps; i++)
-		printf("%f %f %f\n", time_scan[i], time_scan_neighbor[i], time_del[i]);
+		printf("%f %f %f\n", time_scan[i] / (float)count_of_tests, time_scan_neighbor[i] / (float)count_of_tests, time_del[i] / (float)count_of_tests);
 	free(time_scan);
 	free(time_del);
 	free(time_scan_neighbor);
+	return OK;
+}
+
+int test_add(int k, int n, int start_pos, int step, int count_of_steps, int count_of_tests, int size_of_arr_for_test) {
+	tree* t;
+	srand(time(NULL));
+	float* time_add = (float*)calloc(count_of_steps + 1, sizeof(float));
+	string** string_array_for_test;
+	if (create_random_arr_of_string(&string_array_for_test, size_of_arr_for_test, 0))
+		return OF;
+	for (int i = 0; i < count_of_tests; i++) {
+		create_tree(&t, n, k);
+		printf("Test #%d\n", i + 1);
+		int** key_array_for_test, start, end;
+		for (int j = 0; j < count_of_steps; j++) {
+			if (create_random_arr_of_keys(&key_array_for_test, k, size_of_arr_for_test))
+				return OF;
+			if (j == 0) {
+				if (add_random_items_to_tree(t, start_pos))
+					return OF;
+			}
+			else
+				if (add_random_items_to_tree(t, step - size_of_arr_for_test))
+					return OF;
+			start = clock();
+			for (int l = 0; l < size_of_arr_for_test; l++)
+				if (add_e(t, key_array_for_test[l], string_array_for_test[l]) == DB)
+					free(key_array_for_test[l]);
+			end = clock();
+			free(key_array_for_test);
+			time_add[j] = (float)(end - start) / (float)CLOCKS_PER_SEC;
+		}
+		free(string_array_for_test);
+		free_tree(t);
+	}
+	for (int i = 0; i < count_of_steps; i++)
+		printf("%f\n", time_add[i] / (float)count_of_tests);
+	free(time_add);
 	return OK;
 }
 
