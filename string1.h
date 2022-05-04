@@ -24,4 +24,8 @@ int strcp(string* s1, string** s2);
 
 int get_f(string** s, FILE* file);
 
+int create_random_string(string** s, int size);
+
+int create_random_arr_of_string(string*** arr_s, int arr_size, int el_size);
+
 void print_string(string* s);

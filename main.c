@@ -120,6 +120,9 @@ int choice(tree* t, int a) {
 		if (print_tree(t))
 			printf("Something is wrong with the tree\n");
 		return OK;
+	case 8:
+		test_scan_del_scan_neighbor(2, 10, 20000, 10000, 50, 10, 10000);
+		return OK;
 	}
 	return CZ;
 }

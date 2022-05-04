@@ -95,6 +95,43 @@ int get_f(string** s, FILE* file) {
 	return OK1;
 }
 
+int create_random_string(string** s, int size) {
+	if (size < 0)
+		return UN1;
+	*s = (string*)calloc(1, sizeof(string));
+	if (*s == NULL)
+		return OF1;
+	(*s)->size = size;
+	(*s)->string = (char*)calloc((*s)->size + 2, sizeof(char));
+	if ((*s)->string == NULL) {
+		free(*s);
+		return OF1;
+	}
+	for (int i = 0; i <= (*s)->size; i++)
+		(*s)->string[i] = 'a' + rand() % 26;
+	(*s)->string[(*s)->size + 1] = '\0';
+	return OK1;
+}
+
+int create_random_arr_of_string(string*** arr_s, int arr_size, int el_size) {
+	if (arr_size < 1 || el_size < 0)
+		return UN1;
+	*arr_s = (string**)calloc(arr_size, sizeof(string*));
+	if (*arr_s == NULL)
+		return OF1;
+	int error;
+	for (int i = 0; i < arr_size; i++) {
+		error = create_random_string(&(*arr_s)[i], el_size);
+		if (error) {
+			for (int j = 0; j < i; j++)
+				free_s(&(*arr_s)[i]);
+			free(*arr_s);
+			return error;
+		}
+	}
+	return OK1;
+}
+
 void print_string(string* s) {
 	if (s != NULL)
 		if (s->string != NULL)

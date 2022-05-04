@@ -223,7 +223,7 @@ int scan_neighbor(tree* t, int* key, int* distance, int** key_data, string** inf
 			min_distance += (key[i] - t->item->keys[0][i]) * (key[i] - t->item->keys[0][i]);
 		for (int i = 1; i <= t->item->size_arrs; i++) {
 			for (int j = 0; j < t->k; j++)
-				buffer_distance += (key[j] - t->item->keys[i][j]) * (key[i] - t->item->keys[i][j]);
+				buffer_distance += (key[j] - t->item->keys[i][j]) * (key[j] - t->item->keys[i][j]);
 			if (buffer_distance < min_distance) {
 				min_distance = buffer_distance;
 				index = i;
@@ -315,6 +315,89 @@ int add_e_from_file(tree* t, FILE* file) {
 		add_e(t, key, info);
 		break;
 	}
+	return OK;
+}
+
+int create_random_key(int** key, int k) {
+	*key = (int*)calloc(k, sizeof(int));
+	if (*key == NULL)
+		return UN;
+	for (int i = 0; i < k; i++)
+		(*key)[i] = rand();
+	return OK;
+}
+
+int create_random_arr_of_keys(int*** keys, int k, int size_of_array) {
+	*keys = (int**)calloc(size_of_array, sizeof(int*));
+	for (int i = 0; i < size_of_array; i++)
+		if (create_random_key(&(*keys)[i], k))
+			return OF;
+	return OK;
+}
+
+int add_random_items_to_tree(tree* t, int count_of_elements) {
+	for (int i = 0; i < count_of_elements; i++) {
+		int* buffer_key;
+		string* buffer_info;
+		if (create_random_string(&buffer_info, 0))
+			return UN;
+		if (create_random_key(&buffer_key, t->k))
+			return UN;
+		if (add_e(t, buffer_key, buffer_info)) {
+			free(buffer_key);
+			free_s(&buffer_info);
+			i--;
+		}
+	}
+	return OK;
+}
+
+int test_scan_del_scan_neighbor(int k, int n, int start_pos, int step, int count_of_steps, int count_of_tests, int size_of_arr_for_test) {
+	tree* t;
+	srand(time(NULL));
+	float* time_scan = (float*)calloc(count_of_steps + 1, sizeof(float));
+	float* time_del = (float*)calloc(count_of_steps + 1, sizeof(float));
+	float* time_scan_neighbor = (float*)calloc(count_of_steps + 1, sizeof(float));
+	for (int i = 0; i < count_of_tests; i++) {
+		create_tree(&t, n, k);
+		printf("Test #%d\n", i+1);
+		int** key_array_for_test, start, end;
+		create_random_arr_of_keys(&key_array_for_test, k, size_of_arr_for_test);
+		for (int j = 0; j < count_of_steps; j++) {
+			if (j == 0)
+				add_random_items_to_tree(t, start_pos);
+			else
+				add_random_items_to_tree(t, step);
+			int* buffer_key, buffer_distace, count_of_del = 0;
+			string* buffer_data;
+			start = clock();
+			for (int l = 0; l < size_of_arr_for_test; l++)
+				scan(t, key_array_for_test[l], &buffer_data);
+			end = clock();
+			time_scan[j] = (float)(end - start) / (float)CLOCKS_PER_SEC;
+			start = clock();
+			for (int l = 0; l < size_of_arr_for_test; l++)
+				scan_neighbor(t, key_array_for_test[l], &buffer_distace, &buffer_key, &buffer_data);
+			end = clock();
+			time_scan_neighbor[j] = (float)(end - start) / (float)CLOCKS_PER_SEC;
+			start = clock();
+			for (int l = 0; l < size_of_arr_for_test; l++)
+				if (del_e(t, key_array_for_test[l]))
+					count_of_del++;
+			end = clock();
+			time_del[j] = (float)(end - start) / (float)CLOCKS_PER_SEC;
+			add_random_items_to_tree(t, count_of_del);
+		}
+		for (int j = 0; j < size_of_arr_for_test; j++)
+			free(key_array_for_test[j]);
+		free(key_array_for_test);
+		free_tree(t);
+	}
+	for (int i = 0; i < count_of_steps; i++)
+		printf("%f %f %f\n", time_scan[i], time_scan_neighbor[i], time_del[i]);
+	free(time_scan);
+	free(time_del);
+	free(time_scan_neighbor);
 	return OK;
 }
 
