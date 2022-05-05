@@ -42,7 +42,7 @@ int del_e(tree* t, int* key);
 
 int sort_item(item* item, int arg);
 
-int print_tree(tree* t);
+int print_tree(tree* t, int shift);
 
 int compar_keys(int* key1, int* key2, int size);
 

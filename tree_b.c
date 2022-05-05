@@ -9,7 +9,7 @@ void create_tree(tree** t, int max_count_of_elements_on_lvl, int k) {
 	(*t)->item = (item*)calloc(1, sizeof(item));
 	(*t)->item->size_arrs = -1;
 	(*t)->item->info = (string**)calloc((*t)->max_count_of_elements_on_lvl, sizeof(string*));
-	(*t)->item->keys = (int**)calloc((*t)->max_count_of_elements_on_lvl, sizeof(int));
+	(*t)->item->keys = (int**)calloc((*t)->max_count_of_elements_on_lvl, sizeof(int*));
 	(*t)->arg = 0;
 }
 
@@ -241,10 +241,48 @@ int del_e(tree* t, int* key) {
 	if (t == NULL || key == NULL)
 		return UN;
 	if (t->left != NULL && t->right != NULL) {
+		int error, flag = 0;
+		if (t->left->item != NULL || t->right->item != NULL)
+			flag = 1;
 		if (t->border > key[t->arg])
-			return del_e(t->left, key);
+			error = del_e(t->left, key);
 		if (t->border < key[t->arg])
-			return del_e(t->right, key);
+			error = del_e(t->right, key);
+		if (flag && !error) {
+			if (t->left->item->size_arrs + t->right->item->size_arrs < t->max_count_of_elements_on_lvl) {
+				t->item = (item*)calloc(1, sizeof(item));
+				t->item->info = (string**)calloc(t->max_count_of_elements_on_lvl, sizeof(string*));
+				t->item->keys = (int**)calloc(t->max_count_of_elements_on_lvl, sizeof(int*));
+				t->item->size_arrs = -1;
+				for (int i = 0; i < t->left->item->size_arrs; i++) {
+					t->item->keys[i] = t->left->item->keys[i];
+					t->item->info[i] = t->left->item->info[i];
+					free_s(&t->left->item->info[i]);
+					free(t->left->item->keys[i]);
+					t->item->size_arrs++;
+				}
+				for (int i = 0; i < t->right->item->size_arrs; i++) {
+					t->item->keys[i + 1 + t->left->item->size_arrs] = t->right->item->keys[i];
+					t->item->info[i + 1 + t->left->item->size_arrs] = t->right->item->info[i];
+					free_s(&t->right->item->info[i]);
+					free(t->right->item->keys[i]);
+					t->item->size_arrs++;
+				}
+				free(t->left->item->info);
+				free(t->left->item->keys);
+				free(t->left->item);
+				free(t->left);
+				free(t->right->item->info);
+				free(t->right->item->keys);
+				free(t->right->item);
+				free(t->right);
+				t->left = NULL;
+				t->right = NULL;
+				t->border = 0;
+				return OK;
+			}
+			return OK;
+		}
 		if (t->border == key[t->arg]) {
 			if (!del_e(t->left, key))
 				return OK;
@@ -276,22 +314,29 @@ int del_e(tree* t, int* key) {
 	return UN;
 }
 
-int print_tree(tree* t) {
+int print_tree(tree* t, int shift) {
 	if (t == NULL)
 		return UN;
-	if (t->left != NULL)
-		print_tree(t->left);
+	if (t->left != NULL) {
+		printf("[%d: %f] - left ", t->arg, t->border);
+		print_tree(t->left, shift + 1);
+	}
 	if (t->left == NULL && t->right == NULL) {
 		for (int i = 0; i <= t->item->size_arrs; i++) {
 			for (int j = 0; j < t->k; j++)
 				printf("%d ", t->item->keys[i][j]);
 			print_string(t->item->info[i]);
-			printf("\n");
+			printf("\t");
 		}
-		printf("\n");
+		if (t->item->size_arrs >= 0)
+			printf("\n");
 	}
-	if (t->right != NULL)
-		print_tree(t->right);
+	if (t->right != NULL) {
+		for (int i = 0; i < shift; i++)
+			printf("\t\t\t");
+		printf("\t      \\ right ");
+		print_tree(t->right, shift + 1);
+	}
 	return OK;
 }
 

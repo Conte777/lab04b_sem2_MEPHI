@@ -117,7 +117,7 @@ int choice(tree* t, int a) {
 		return OK;
 	case 7:
 		printf("key info\n");
-		if (print_tree(t))
+		if (print_tree(t, 0))
 			printf("Something is wrong with the tree\n");
 		return OK;
 	case 8:
