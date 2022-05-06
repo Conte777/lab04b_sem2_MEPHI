@@ -241,31 +241,33 @@ int del_e(tree* t, int* key) {
 	if (t == NULL || key == NULL)
 		return UN;
 	if (t->left != NULL && t->right != NULL) {
-		int error, flag = 0;
+		int error = -1, flag = 0;
 		if (t->left->item != NULL || t->right->item != NULL)
 			flag = 1;
 		if (t->border > key[t->arg])
 			error = del_e(t->left, key);
 		if (t->border < key[t->arg])
 			error = del_e(t->right, key);
+		if (t->border == key[t->arg]) {
+			if (!del_e(t->left, key))
+				error = OK;
+			if (!del_e(t->right, key))
+				error = OK;
+		}
 		if (flag && !error) {
-			if (t->left->item->size_arrs + t->right->item->size_arrs < t->max_count_of_elements_on_lvl) {
+			if (t->left->item->size_arrs + t->right->item->size_arrs + 2 <= t->max_count_of_elements_on_lvl) {
 				t->item = (item*)calloc(1, sizeof(item));
 				t->item->info = (string**)calloc(t->max_count_of_elements_on_lvl, sizeof(string*));
 				t->item->keys = (int**)calloc(t->max_count_of_elements_on_lvl, sizeof(int*));
 				t->item->size_arrs = -1;
-				for (int i = 0; i < t->left->item->size_arrs; i++) {
+				for (int i = 0; i <= t->left->item->size_arrs; i++) {
 					t->item->keys[i] = t->left->item->keys[i];
 					t->item->info[i] = t->left->item->info[i];
-					free_s(&t->left->item->info[i]);
-					free(t->left->item->keys[i]);
 					t->item->size_arrs++;
 				}
-				for (int i = 0; i < t->right->item->size_arrs; i++) {
+				for (int i = 0; i <= t->right->item->size_arrs; i++) {
 					t->item->keys[i + 1 + t->left->item->size_arrs] = t->right->item->keys[i];
 					t->item->info[i + 1 + t->left->item->size_arrs] = t->right->item->info[i];
-					free_s(&t->right->item->info[i]);
-					free(t->right->item->keys[i]);
 					t->item->size_arrs++;
 				}
 				free(t->left->item->info);
@@ -279,16 +281,8 @@ int del_e(tree* t, int* key) {
 				t->left = NULL;
 				t->right = NULL;
 				t->border = 0;
-				return OK;
 			}
 			return OK;
-		}
-		if (t->border == key[t->arg]) {
-			if (!del_e(t->left, key))
-				return OK;
-			if (!del_e(t->right, key))
-				return OK;
-			return UN;
 		}
 	}
 	if (t->left == NULL && t->right == NULL) {
@@ -323,10 +317,15 @@ int print_tree(tree* t, int shift) {
 	}
 	if (t->left == NULL && t->right == NULL) {
 		for (int i = 0; i <= t->item->size_arrs; i++) {
+			printf("(");
 			for (int j = 0; j < t->k; j++)
-				printf("%d ", t->item->keys[i][j]);
+				if (j != t->k - 1)
+					printf("%d, ", t->item->keys[i][j]);
+				else
+					printf("%d", t->item->keys[i][j]);
+			printf(") ");
 			print_string(t->item->info[i]);
-			printf("\t");
+			printf("  ");
 		}
 		if (t->item->size_arrs >= 0)
 			printf("\n");
