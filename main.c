@@ -116,15 +116,14 @@ int choice(tree* t, int a) {
 		free_s(&info);
 		return OK;
 	case 7:
-		printf("key info\n");
 		if (print_tree(t, 0))
 			printf("Something is wrong with the tree\n");
 		return OK;
 	case 8:
-		test_scan_del_scan_neighbor(2, 10, 20000, 10000, 50, 10, 10000);
+		test_scan_del_scan_neighbor(2, 10, 20000, 10000, 109, 10, 10000);
 		return OK;
 	case 9:
-		test_add(2, 10, 20000, 10000, 50, 10, 10000);
+		test_add(2, 10, 10000, 10000, 110, 10, 9999);
 		return OK;
 	}
 	return CZ;

@@ -242,7 +242,7 @@ int del_e(tree* t, int* key) {
 		return UN;
 	if (t->left != NULL && t->right != NULL) {
 		int error = -1, flag = 0;
-		if (t->left->item != NULL || t->right->item != NULL)
+		if (t->left->item != NULL && t->right->item != NULL)
 			flag = 1;
 		if (t->border > key[t->arg])
 			error = del_e(t->left, key);
@@ -449,14 +449,14 @@ int test_add(int k, int n, int start_pos, int step, int count_of_steps, int coun
 	tree* t;
 	srand(time(NULL));
 	float* time_add = (float*)calloc(count_of_steps + 1, sizeof(float));
-	string** string_array_for_test;
-	if (create_random_arr_of_string(&string_array_for_test, size_of_arr_for_test, 0))
-		return OF;
+	string** string_array_for_test = NULL;
 	for (int i = 0; i < count_of_tests; i++) {
 		create_tree(&t, n, k);
 		printf("Test #%d\n", i + 1);
 		int** key_array_for_test, start, end;
 		for (int j = 0; j < count_of_steps; j++) {
+			if (create_random_arr_of_string(&string_array_for_test, size_of_arr_for_test, 0))
+				return OF;
 			if (create_random_arr_of_keys(&key_array_for_test, k, size_of_arr_for_test))
 				return OF;
 			if (j == 0) {
@@ -468,13 +468,15 @@ int test_add(int k, int n, int start_pos, int step, int count_of_steps, int coun
 					return OF;
 			start = clock();
 			for (int l = 0; l < size_of_arr_for_test; l++)
-				if (add_e(t, key_array_for_test[l], string_array_for_test[l]) == DB)
+				if (add_e(t, key_array_for_test[l], string_array_for_test[l]) == DB) {
 					free(key_array_for_test[l]);
+					free_s(&string_array_for_test[l]);
+				}
 			end = clock();
 			free(key_array_for_test);
+			free(string_array_for_test);
 			time_add[j] = (float)(end - start) / (float)CLOCKS_PER_SEC;
 		}
-		free(string_array_for_test);
 		free_tree(t);
 	}
 	for (int i = 0; i < count_of_steps; i++)
