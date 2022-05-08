@@ -282,8 +282,8 @@ int del_e(tree* t, int* key) {
 				t->right = NULL;
 				t->border = 0;
 			}
-			return OK;
 		}
+		return error;
 	}
 	if (t->left == NULL && t->right == NULL) {
 		if (t->item->size_arrs < 0)
@@ -327,8 +327,9 @@ int print_tree(tree* t, int shift) {
 			print_string(t->item->info[i]);
 			printf("  ");
 		}
-		if (t->item->size_arrs >= 0)
-			printf("\n");
+		if (t->item->size_arrs < 0)
+			printf("NULL");
+		printf("\n");
 	}
 	if (t->right != NULL) {
 		for (int i = 0; i < shift; i++)

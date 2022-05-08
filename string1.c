@@ -48,15 +48,13 @@ int compar(string* s1, string* s2) {
 
 void free_s(string** s) {
 	if (*s != NULL) {
-		if ((*s)->size >= -1 && (*s)->size <= 1000) {
-			if ((*s)->string != NULL) {
-				free((*s)->string);
-				(*s)->string = NULL;
-				(*s)->size = -2;
-			}
-			free(*s);
-			*s = NULL;
+		if ((*s)->string != NULL) {
+			free((*s)->string);
+			(*s)->string = NULL;
+			(*s)->size = -2;
 		}
+		free(*s);
+		*s = NULL;
 	}
 }
 
