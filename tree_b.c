@@ -312,7 +312,7 @@ int print_tree(tree* t, int shift) {
 	if (t == NULL)
 		return UN;
 	if (t->left != NULL) {
-		printf("[%d: %f] - left ", t->arg, t->border);
+		printf("[%d: %f] - left ", t->arg + 1, t->border);
 		print_tree(t->left, shift + 1);
 	}
 	if (t->left == NULL && t->right == NULL) {
@@ -483,6 +483,44 @@ int test_add(int k, int n, int start_pos, int step, int count_of_steps, int coun
 	for (int i = 0; i < count_of_steps; i++)
 		printf("%f\n", time_add[i] / (float)count_of_tests);
 	free(time_add);
+	return OK;
+}
+
+int viz_tree(tree* t, FILE* file, int start_flag) {
+	if (!t)
+		return UN;
+	if (start_flag)
+		fprintf(file, "digraph viz {\n");
+	if (!t->item) {
+		if (t->left) {
+			fprintf(file, "\"[%d: %f]\"->", t->arg + 1, t->border);
+			viz_tree(t->left, file, 0);
+		}
+		if (t->right) {
+			fprintf(file, "\"[%d: %f]\"->", t->arg + 1, t->border);
+			viz_tree(t->right, file, 0);
+		}
+	}
+	else {
+		fprintf(file, "\"");
+		for (int i = 0; i <= t->item->size_arrs; i++) {
+			fprintf(file, "(");
+			for (int j = 0; j < t->k; j++)
+				if (j != t->k - 1)
+					fprintf(file, "%d, ", t->item->keys[i][j]);
+				else
+					fprintf(file, "%d", t->item->keys[i][j]);
+			fprintf(file, ") ");
+			fwrite(t->item->info[i]->string, sizeof(char), t->item->info[i]->size + 1, file);
+			if (i != t->item->size_arrs)
+				fprintf(file, "  ");
+		}
+		if (t->item->size_arrs < 0)
+			fprintf(file, "NULL");
+		fprintf(file, "\";\n");
+	}
+	if (start_flag)
+		fprintf(file, "}\n");
 	return OK;
 }
 

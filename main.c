@@ -120,9 +120,24 @@ int choice(tree* t, int a) {
 			printf("Something is wrong with the tree\n");
 		return OK;
 	case 8:
-		test_scan_del_scan_neighbor(2, 10, 20000, 10000, 109, 10, 10000);
+		file = fopen("viz.gv", "w+");
+		if (file == NULL)
+			return UN;
+		if (viz_tree(t, file, 1) == OK) {
+			fclose(file);
+			system("dot -Tpng viz.gv -o viz.png");
+			system("start viz.png");
+		}
+		else {
+			printf("Tree is empty.\n");
+			fclose(file);
+		}
+		remove("viz.gv");
 		return OK;
 	case 9:
+		test_scan_del_scan_neighbor(2, 10, 20000, 10000, 109, 10, 10000);
+		return OK;
+	case 10:
 		test_add(2, 10, 10000, 10000, 110, 10, 9999);
 		return OK;
 	}

@@ -12,3 +12,5 @@ build/Debug/main.o
 build/Debug/outDebug.exe
 build/Release/outRelease.exe
 data.txt
+viz.gv
+viz.png

@@ -57,3 +57,5 @@ int add_random_items_to_tree(tree* t, int count_of_elements);
 int test_scan_del_scan_neighbor(int k, int n, int start_pos, int step, int count_of_steps, int count_of_tests, int size_of_arr_for_test);
 
 int test_add(int k, int n, int start_pos, int step, int count_of_steps, int count_of_tests, int size_of_arr_for_test);
+
+int viz_tree(tree* t, FILE* file, int start_flag);
