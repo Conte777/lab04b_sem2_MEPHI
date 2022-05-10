@@ -34,7 +34,7 @@ int add_e(tree* t, int* key, string* info);
 
 int scan(tree* t, int* key, string** data);
 
-int scan_neighbor(tree* t, int* key, int* distance, int** key_data, string** info_data);
+int scan_neighbor(tree* t, int* key, float* distance, int** key_data, string** info_data);
 
 int scan_max(tree* t, int** key_data, string** info_data);
 

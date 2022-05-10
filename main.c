@@ -29,7 +29,8 @@ void print_key(int* key, int size) {
 }
 
 int choice(tree* t, int a) {
-	int* key, * key_data, distace, error;
+	int* key, * key_data, error;
+	float distace;
 	string* info, * info_data;
 	FILE* file = NULL;
 	switch (a) {
@@ -80,24 +81,27 @@ int choice(tree* t, int a) {
 		return OK;
 	case 4:
 		printf("Maximum element in the tree:\nkey: ");
-		scan_max(t, &key_data, &info_data);
-		print_key(key_data, t->k);
-		printf("\ninfo: ");
-		print_string(info_data);
-		printf("\n");
-		return OK;
-	case 5:
-		printf("Enter key: ");
-		get_key(&key, t->k);
-		if (!scan_neighbor(t, key, &distace, &key_data, &info_data)) {
-			printf("Here's what was found on your key:\ndistace: %d\nkey: ", distace);
+		if (!scan_max(t, &key_data, &info_data)) {
 			print_key(key_data, t->k);
 			printf("\ninfo: ");
 			print_string(info_data);
 			printf("\n");
 		}
 		else
-			printf("Tree is empty");
+			printf("Tree is empty\n");
+		return OK;
+	case 5:
+		printf("Enter key: ");
+		get_key(&key, t->k);
+		if (!scan_neighbor(t, key, &distace, &key_data, &info_data)) {
+			printf("Here's what was found on your key:\ndistace: sqrt(%f)\nkey: ", distace);
+			print_key(key_data, t->k);
+			printf("\ninfo: ");
+			print_string(info_data);
+			printf("\n");
+		}
+		else
+			printf("Tree is empty\n");
 		free(key);
 		return OK;
 	case 6:

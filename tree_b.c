@@ -224,6 +224,8 @@ int scan(tree* t, int* key, string** data) {
 int scan_max(tree* t, int** key_data, string** info_data) {
 	if (t == NULL)
 		return UN;
+	if ((t->item) && t->item->size_arrs == -1)
+		return UN;
 	tree* ptr = t;
 	while (ptr->right != NULL)
 		ptr = ptr->right;
@@ -232,8 +234,10 @@ int scan_max(tree* t, int** key_data, string** info_data) {
 	return OK;
 }
 
-int scan_neighbor(tree* t, int* key, int* distance, int** key_data, string** info_data) {
+int scan_neighbor(tree* t, int* key, float* distance, int** key_data, string** info_data) {
 	if (t == NULL || key == NULL)
+		return UN;
+	if ((t->item) && t->item->size_arrs == -1)
 		return UN;
 	if (t->left != NULL && t->right != NULL) {
 		if (key[t->arg] != t->border) {
@@ -241,9 +245,9 @@ int scan_neighbor(tree* t, int* key, int* distance, int** key_data, string** inf
 				scan_neighbor(t->left, key, distance, key_data, info_data);
 			if (key[t->arg] > t->border)
 				scan_neighbor(t->right, key, distance, key_data, info_data);
-			int distance_to_box = t->border - key[t->arg];
+			float distance_to_box = t->border - key[t->arg], buffer_distance;
 			distance_to_box *= distance_to_box;
-			int buffer_distance, * buffer_key = NULL;
+			int* buffer_key = NULL;
 			string* buffer_info = NULL;
 			if (distance_to_box <= *distance) {
 				if (key[t->arg] < t->border)
@@ -258,7 +262,8 @@ int scan_neighbor(tree* t, int* key, int* distance, int** key_data, string** inf
 			}
 		}
 		else {
-			int* buffer_key1, * buffer_key2, buffer_distance1, buffer_distance2;
+			int* buffer_key1, * buffer_key2;
+			float buffer_distance1, buffer_distance2;
 			string* buffer_info1, * buffer_info2;
 			scan_neighbor(t->left, key, &buffer_distance1, &buffer_key1, &buffer_info1);
 			scan_neighbor(t->right, key, &buffer_distance2, &buffer_key2, &buffer_info2);
@@ -276,7 +281,8 @@ int scan_neighbor(tree* t, int* key, int* distance, int** key_data, string** inf
 		return OK;
 	}
 	if (t->left == NULL && t->right == NULL) {
-		int min_distance = 0, buffer_distance = 0, index = 0;
+		int index = 0;
+		float min_distance = 0, buffer_distance = 0;
 		for (int i = 0; i < t->k; i++)
 			min_distance += (key[i] - t->item->keys[0][i]) * (key[i] - t->item->keys[0][i]);
 		for (int i = 1; i <= t->item->size_arrs; i++) {
@@ -286,6 +292,7 @@ int scan_neighbor(tree* t, int* key, int* distance, int** key_data, string** inf
 				min_distance = buffer_distance;
 				index = i;
 			}
+			buffer_distance = 0;
 		}
 		*distance = min_distance;
 		*key_data = t->item->keys[index];
@@ -471,7 +478,8 @@ int test_scan_del_scan_neighbor(int k, int n, int start_pos, int step, int count
 				add_random_items_to_tree(t, start_pos);
 			else
 				add_random_items_to_tree(t, step);
-			int* buffer_key, buffer_distace, count_of_del = 0;
+			int* buffer_key, count_of_del = 0;
+			float buffer_distace;
 			string* buffer_data;
 			start = clock();
 			for (int l = 0; l < size_of_arr_for_test; l++)
