@@ -405,6 +405,40 @@ int print_tree(tree* t, int shift) {
 	return OK;
 }
 
+int print_tree_in_range(tree* t, int** range) {
+	if (t == NULL)
+		return UN;
+	if (t->left != NULL) {
+		if (range[0][t->arg] <= t->border)
+			print_tree_in_range(t->left, range);
+	}
+	if ((t->item != NULL) && (t->item->size_arrs >= 0)) {
+		for (int i = 0; i <= t->item->size_arrs; i++) {
+			int flag = 1;
+			for (int j = 0; j < t->k; j++)
+				if (t->item->keys[i][j] < range[0][j] || t->item->keys[i][j] > range[1][j]) {
+					flag = 0;
+					break;
+				}
+			if (flag) {
+				printf("(");
+				for (int j = 0; j < t->k; j++) {
+					if (j != t->k - 1)
+						printf("%d, ", t->item->keys[i][j]);
+					else
+						printf("%d) ", t->item->keys[i][j]);
+				}
+				print_string(t->item->info[i]);
+				printf("\n");
+			}
+		}
+	}
+	if (t->right != NULL)
+		if (range[1][t->arg] >= t->border)
+			print_tree_in_range(t->right, range);
+	return OK;
+}
+
 int add_e_from_file(tree* t, FILE* file) {
 	if (t == NULL || file == NULL)
 		return UN;

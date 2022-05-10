@@ -29,7 +29,7 @@ void print_key(int* key, int size) {
 }
 
 int choice(tree* t, int a) {
-	int* key, * key_data, error;
+	int* key, * key_data, error, ** range;
 	float distace;
 	string* info, * info_data;
 	FILE* file = NULL;
@@ -139,9 +139,22 @@ int choice(tree* t, int a) {
 		remove("viz.gv");
 		return OK;
 	case 9:
-		test_scan_del_scan_neighbor(2, 10, 20000, 10000, 109, 10, 10000);
+		range = (int**)calloc(2, sizeof(int*));
+		for (int i = 0; i < 2; i++) {
+			printf("Enter key for range: ");
+			get_key(&range[i], t->k);
+		}
+		printf("\nkey info\n");
+		if (print_tree_in_range(t, range))
+			printf("Tree is empty.\n");
+		for (int i = 0; i < 2; i++)
+			free(range[i]);
+		free(range);
 		return OK;
 	case 10:
+		test_scan_del_scan_neighbor(2, 10, 20000, 10000, 109, 10, 10000);
+		return OK;
+	case 11:
 		test_add(2, 10, 10000, 10000, 110, 10, 9999);
 		return OK;
 	}
@@ -179,7 +192,7 @@ int main() {
 	}
 	create_tree(&t, n, k);
 	while (flag) {
-		printf("\nEnter the number of the item to be executed\n0. Exit\n1. Add new element\n2. Scan\n3. Delete\n4. Scaning max\n5. Scan neighbor\n6. Add items from a file\n7. Print tree\nEnter number: ");
+		printf("\nEnter the number of the item to be executed\n0. Exit\n1. Add new element\n2. Scan\n3. Delete\n4. Scaning max\n5. Scan neighbor\n6. Add items from a file\n7. Print tree\n8. Viz tree\n9. Print tree in range\nEnter number: ");
 		b = scanf("%d", &a);
 		// system("cls");
 		if (b > 0 && a > 0 && a <= 12) {
