@@ -44,60 +44,118 @@ int add_e(tree* t, int* key, string* info) {
 			return OK;
 		}
 		else {
-			for (int i = 0; i <= t->item->size_arrs; i++)
-				if (compar_keys(key, t->item->keys[i], t->k))
+			if ((t->max_count_of_elements_on_lvl > 1) || t->item->keys[0][t->arg] > key[t->arg]) {
+				for (int i = 0; i <= t->item->size_arrs; i++)
+					if (compar_keys(key, t->item->keys[i], t->k))
+						return DB;
+				item* item_left = (item*)calloc(1, sizeof(item));
+				item* item_right = (item*)calloc(1, sizeof(item));
+				if (!item_left || !item_right)
 					return DB;
-			item* item1 = (item*)calloc(1, sizeof(item));
-			item* item2 = (item*)calloc(1, sizeof(item));
-			if ((t->item->size_arrs + 1) % 2 == 0) {
-				item1->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
-				item2->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
+				if ((t->item->size_arrs + 1) % 2 == 0) {
+					item_left->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
+					item_right->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
+				}
+				else {
+					item_left->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
+					item_right->size_arrs = (t->item->size_arrs + 1) / 2;
+				}
+				item_left->info = (string**)calloc(t->max_count_of_elements_on_lvl, sizeof(string*));
+				item_left->keys = (int**)calloc(t->max_count_of_elements_on_lvl, sizeof(int*));
+				item_right->info = (string**)calloc(t->max_count_of_elements_on_lvl, sizeof(string*));
+				item_right->keys = (int**)calloc(t->max_count_of_elements_on_lvl, sizeof(int*));
+				if (!item_left->info || !item_left->keys || !item_right->info || !item_right->keys)
+					return OF;
+				for (int i = 0; i <= item_left->size_arrs; i++) {
+					item_left->keys[i] = t->item->keys[i];
+					item_left->info[i] = t->item->info[i];
+				}
+				for (int i = 0; i <= item_right->size_arrs; i++) {
+					item_right->keys[i] = t->item->keys[item_left->size_arrs + 1 + i];
+					item_right->info[i] = t->item->info[item_left->size_arrs + 1 + i];
+				}
+				free(t->item->keys);
+				free(t->item->info);
+				free(t->item);
+				t->item = NULL;
+				tree* left = (tree*)calloc(1, sizeof(tree));
+				tree* right = (tree*)calloc(1, sizeof(tree));
+				if (!left || !right)
+					return OF;
+				if (t->arg + 1 < t->k) {
+					left->arg = t->arg + 1;
+					right->arg = t->arg + 1;
+				}
+				else {
+					left->arg = 0;
+					right->arg = 0;
+				}
+				left->max_count_of_elements_on_lvl = t->max_count_of_elements_on_lvl;
+				right->max_count_of_elements_on_lvl = t->max_count_of_elements_on_lvl;
+				left->item = item_left;
+				right->item = item_right;
+				left->k = t->k;
+				right->k = t->k;
+				if (left->item->size_arrs >= 0 && right->item->size_arrs >= 0) {
+					t->border = (float)left->item->keys[left->item->size_arrs][t->arg];
+					t->border += (float)right->item->keys[0][t->arg];
+					t->border /= 2.0;
+				}
+				else
+					t->border = (float)right->item->keys[0][t->arg];
+				sort_item(item_left, left->arg);
+				sort_item(item_right, right->arg);
+				t->left = left;
+				t->right = right;
+				add_e(t, key, info);
+				return OK;
 			}
 			else {
-				item1->size_arrs = (t->item->size_arrs + 1) / 2 - 1;
-				item2->size_arrs = (t->item->size_arrs + 1) / 2;
+				if (compar_keys(t->item->keys[0], key, t->k))
+					return DB;
+				tree* left = (tree*)calloc(1, sizeof(tree));
+				tree* right = (tree*)calloc(1, sizeof(tree));
+				if (!left || !right)
+					return OF;
+				if (t->arg + 1 < t->k) {
+					left->arg = t->arg + 1;
+					right->arg = t->arg + 1;
+				}
+				else {
+					left->arg = 0;
+					right->arg = 0;
+				}
+				left->max_count_of_elements_on_lvl = t->max_count_of_elements_on_lvl;
+				right->max_count_of_elements_on_lvl = t->max_count_of_elements_on_lvl;
+				left->k = t->k;
+				right->k = t->k;
+				t->border = ((float)(key[t->arg] + t->item->keys[0][t->arg])) / 2.0;
+				item* item_left = (item*)calloc(1, sizeof(item));
+				item* item_right = (item*)calloc(1, sizeof(item));
+				if (!item_left || !item_right)
+					return DB;
+				item_left->size_arrs = 0;
+				item_right->size_arrs = 0;
+				item_left->keys = (int**)calloc(t->max_count_of_elements_on_lvl, sizeof(int*));
+				item_left->info = (string**)calloc(t->max_count_of_elements_on_lvl, sizeof(string*));
+				item_right->keys = (int**)calloc(t->max_count_of_elements_on_lvl, sizeof(int*));
+				item_right->info = (string**)calloc(t->max_count_of_elements_on_lvl, sizeof(string*));
+				if (!item_left->info || !item_left->keys || !item_right->info || !item_right->keys)
+					return OF;
+				item_left->keys[0] = t->item->keys[0];
+				item_left->info[0] = t->item->info[0];
+				item_right->keys[0] = key;
+				item_right->info[0] = info;
+				left->item = item_left;
+				right->item = item_right;
+				t->left = left;
+				t->right = right;
+				free(t->item->keys);
+				free(t->item->info);
+				free(t->item);
+				t->item = NULL;
+				return OK;
 			}
-			item1->info = (string**)calloc(t->max_count_of_elements_on_lvl, sizeof(string*));
-			item1->keys = (int**)calloc(t->max_count_of_elements_on_lvl, sizeof(int*));
-			item2->info = (string**)calloc(t->max_count_of_elements_on_lvl, sizeof(string*));
-			item2->keys = (int**)calloc(t->max_count_of_elements_on_lvl, sizeof(int*));
-			for (int i = 0; i <= item1->size_arrs; i++) {
-				item1->keys[i] = t->item->keys[i];
-				item1->info[i] = t->item->info[i];
-			}
-			for (int i = 0; i <= item2->size_arrs; i++) {
-				item2->keys[i] = t->item->keys[item1->size_arrs + 1 + i];
-				item2->info[i] = t->item->info[item1->size_arrs + 1 + i];
-			}
-			free(t->item->keys);
-			free(t->item->info);
-			free(t->item);
-			t->item = NULL;
-			tree* left = (tree*)calloc(1, sizeof(tree));
-			tree* right = (tree*)calloc(1, sizeof(tree));
-			if (t->arg + 1 < t->k) {
-				left->arg = t->arg + 1;
-				right->arg = t->arg + 1;
-			}
-			else {
-				left->arg = 0;
-				right->arg = 0;
-			}
-			left->max_count_of_elements_on_lvl = t->max_count_of_elements_on_lvl;
-			right->max_count_of_elements_on_lvl = t->max_count_of_elements_on_lvl;
-			left->item = item1;
-			right->item = item2;
-			left->k = t->k;
-			right->k = t->k;
-			t->border = (float)left->item->keys[left->item->size_arrs][t->arg];
-			t->border += (float)right->item->keys[0][t->arg];
-			t->border /= 2.0;
-			sort_item(item1, left->arg);
-			sort_item(item2, right->arg);
-			t->left = left;
-			t->right = right;
-			add_e(t, key, info);
-			return OK;
 		}
 	}
 	else {
@@ -242,8 +300,6 @@ int del_e(tree* t, int* key) {
 		return UN;
 	if (t->left != NULL && t->right != NULL) {
 		int error = -1, flag = 0;
-		if (t->left->item != NULL && t->right->item != NULL)
-			flag = 1;
 		if (t->border > key[t->arg])
 			error = del_e(t->left, key);
 		if (t->border < key[t->arg])
@@ -254,6 +310,8 @@ int del_e(tree* t, int* key) {
 			if (!del_e(t->right, key))
 				error = OK;
 		}
+		if (t->left->item != NULL && t->right->item != NULL)
+			flag = 1;
 		if (flag && !error) {
 			if (t->left->item->size_arrs + t->right->item->size_arrs + 2 <= t->max_count_of_elements_on_lvl) {
 				t->item = (item*)calloc(1, sizeof(item));
